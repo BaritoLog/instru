@@ -12,8 +12,8 @@ type Instrumentation interface {
 }
 
 type instrumentation struct {
-	Evaluations map[string]*EvaluationMetric `json:"service_metrixs"`
-	Counters    map[string]*CounterMetric    `json:"execution_metrixs"`
+	Evaluations map[string]*EvaluationMetric `json:"evaluations"`
+	Counters    map[string]*CounterMetric    `json:"counters"`
 }
 
 func NewInstrumentation() Instrumentation {
