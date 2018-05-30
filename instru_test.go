@@ -1,6 +1,7 @@
 package instru
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -61,14 +62,30 @@ func TestExposeWithRestful_Error(t *testing.T) {
 func TestSetCallback(t *testing.T) {
 	callback := &dummyCallback{}
 
-	SetCallback(timekit.Duration("2ms"), callback)
+	SetCallback(timekit.Duration("1ms"), callback)
 	FatalIf(t, CallbackInstance != callback, "CallbackInstanct can't be nil")
 
-	timekit.Sleep("5ms")
+	timekit.Sleep("3ms")
 	FatalIf(t, callback.Instr != Instance, "callback.instrument is wrong")
 
 	UnsetCallback()
 	FatalIf(t, CallbackStop != nil, "CallbackStop must be nil")
 	FatalIf(t, CallbackInstance != nil, "CallbackInstance must be nil")
 	FatalIf(t, CallbackTick != nil, "CallbackTick must be nil")
+}
+
+func TestCallback_Error(t *testing.T) {
+	var err error
+	OnErrorFunc = func(err0 error) {
+		err = err0
+	}
+	callback := &dummyCallback{
+		Err: fmt.Errorf("some error"),
+	}
+
+	SetCallback(timekit.Duration("1ms"), callback)
+	defer UnsetCallback()
+
+	timekit.Sleep("2ms")
+	FatalIfWrongError(t, err, "some error")
 }

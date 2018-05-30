@@ -66,7 +66,8 @@ func loopCallback() {
 	for {
 		select {
 		case <-CallbackTick:
-			CallbackInstance.OnCallback(Instance)
+			err := CallbackInstance.OnCallback(Instance)
+			fireError(err)
 		case <-CallbackStop:
 			return
 		}
@@ -75,8 +76,12 @@ func loopCallback() {
 
 func loopError() {
 	for err := range ErrorCh {
-		if OnErrorFunc != nil {
-			OnErrorFunc(err)
-		}
+		fireError(err)
+	}
+}
+
+func fireError(err error) {
+	if OnErrorFunc != nil {
+		OnErrorFunc(err)
 	}
 }
