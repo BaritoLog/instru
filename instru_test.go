@@ -51,8 +51,24 @@ func TestExposeWithRestful_Error(t *testing.T) {
 
 	ExposeWithRestful(":65502")
 	ExposeWithRestful(":65502") // same address
+	defer StopExpose()
 
 	timekit.Sleep("1ms")
 
 	FatalIfWrongError(t, err, "listen tcp :65502: bind: address already in use")
+}
+
+func TestSetCallback(t *testing.T) {
+	callback := &dummyCallback{}
+
+	SetCallback(timekit.Duration("2ms"), callback)
+	FatalIf(t, CallbackInstance != callback, "CallbackInstanct can't be nil")
+
+	timekit.Sleep("5ms")
+	FatalIf(t, callback.Instr != Instance, "callback.instrument is wrong")
+
+	UnsetCallback()
+	FatalIf(t, CallbackStop != nil, "CallbackStop must be nil")
+	FatalIf(t, CallbackInstance != nil, "CallbackInstance must be nil")
+	FatalIf(t, CallbackTick != nil, "CallbackTick must be nil")
 }

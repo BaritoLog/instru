@@ -1,9 +1,17 @@
 package instru
 
+import (
+	"time"
+)
+
 var Instance = NewInstrumentation()
 var ExposerInstance Exposer
 var ErrorCh = make(chan error)
 var OnErrorFunc func(error)
+
+var CallbackInstance Callback
+var CallbackTick <-chan time.Time
+var CallbackStop chan int
 
 func init() {
 	go loopError()
@@ -33,6 +41,36 @@ func StopExpose() {
 		ExposerInstance.Stop()
 	}
 	ExposerInstance = nil
+}
+
+func SetCallback(interval time.Duration, callback Callback) {
+	CallbackTick = time.Tick(interval)
+	CallbackInstance = callback
+	CallbackStop = make(chan int)
+
+	go loopCallback()
+}
+
+func UnsetCallback() {
+	if CallbackStop != nil {
+		CallbackStop <- 1
+	}
+
+	CallbackStop = nil
+	CallbackInstance = nil
+	CallbackTick = nil
+
+}
+
+func loopCallback() {
+	for {
+		select {
+		case <-CallbackTick:
+			CallbackInstance.OnCallback(Instance)
+		case <-CallbackStop:
+			return
+		}
+	}
 }
 
 func loopError() {
