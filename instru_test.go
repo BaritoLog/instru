@@ -18,7 +18,7 @@ func TestEvaluate(t *testing.T) {
 	timekit.Sleep("300ms")
 	eval.Done()
 
-	metric := Instance.GetEvaluationMetric("eval01")
+	metric := DefaultInstrumentation.GetEvaluationMetric("eval01")
 	FatalIf(t, metric.Count != 2, "wrong metric count")
 }
 
@@ -28,20 +28,20 @@ func TestCounter(t *testing.T) {
 	Count("count01").Event("error")
 	Count("count01").Event("fail")
 
-	metric := Instance.GetCounterMetric("count01")
+	metric := DefaultInstrumentation.GetCounterMetric("count01")
 	FatalIf(t, metric.Total != 4, "wrong metric total")
 	FatalIf(t, len(metric.Events) != 3, "wrong metric event")
 }
 
 func TestExposeWithRestful(t *testing.T) {
 	ExposeWithRestful(":65501")
-	FatalIf(t, ExposerInstance == nil, "ExposerInstance can't be nil")
-	FatalIf(t, reflect.TypeOf(ExposerInstance).String() != "*instru.restfulExposer", "wrong type ExposerInstance")
+	FatalIf(t, DefaultExposer == nil, "DefaultExposer can't be nil")
+	FatalIf(t, reflect.TypeOf(DefaultExposer).String() != "*instru.restfulExposer", "wrong type DefaultExposer")
 
 	timekit.Sleep("1ms")
 
 	StopExpose()
-	FatalIf(t, ExposerInstance != nil, "ExposerInstance must be nil")
+	FatalIf(t, DefaultExposer != nil, "DefaultExposer must be nil")
 }
 
 func TestExposeWithRestful_Error(t *testing.T) {
@@ -63,14 +63,14 @@ func TestSetCallback(t *testing.T) {
 	callback := &dummyCallback{}
 
 	SetCallback(timekit.Duration("1ms"), callback)
-	FatalIf(t, CallbackInstance != callback, "CallbackInstanct can't be nil")
+	FatalIf(t, DefaultCallback != callback, "CallbackInstanct can't be nil")
 
 	timekit.Sleep("3ms")
-	FatalIf(t, callback.Instr != Instance, "callback.instrument is wrong")
+	FatalIf(t, callback.Instr != DefaultInstrumentation, "callback.instrument is wrong")
 
 	UnsetCallback()
 	FatalIf(t, CallbackStop != nil, "CallbackStop must be nil")
-	FatalIf(t, CallbackInstance != nil, "CallbackInstance must be nil")
+	FatalIf(t, DefaultCallback != nil, "DefaultCallback must be nil")
 	FatalIf(t, CallbackTick != nil, "CallbackTick must be nil")
 }
 
@@ -94,5 +94,5 @@ func TestSetWebCallback(t *testing.T) {
 	SetWebCallback(timekit.Duration("1ms"), "http://somehost")
 	defer UnsetCallback()
 
-	FatalIf(t, reflect.TypeOf(CallbackInstance).String() != "*instru.webCallback", "wrong type CallbackInstance")
+	FatalIf(t, reflect.TypeOf(DefaultCallback).String() != "*instru.webCallback", "wrong type DefaultCallback")
 }

@@ -4,31 +4,33 @@ import (
 	"time"
 )
 
-var Instance = NewInstrumentation()
-var ExposerInstance Exposer
+var DefaultInstrumentation Instrumentation
+var DefaultExposer Exposer
+var DefaultCallback Callback
+
 var ErrorCh = make(chan error)
 var OnErrorFunc func(error)
 
-var CallbackInstance Callback
 var CallbackTick <-chan time.Time
 var CallbackStop chan int
 
 func init() {
+	DefaultInstrumentation = NewInstrumentation()
 	go loopError()
 }
 
 func Evaluate(name string) Evaluation {
-	return Instance.Evaluate(name)
+	return DefaultInstrumentation.Evaluate(name)
 }
 
 func Count(name string) Counter {
-	return Instance.Count(name)
+	return DefaultInstrumentation.Count(name)
 }
 
 func Expose(exposer Exposer) {
-	ExposerInstance = exposer
+	DefaultExposer = exposer
 	go func() {
-		ErrorCh <- ExposerInstance.Expose(Instance)
+		ErrorCh <- DefaultExposer.Expose(DefaultInstrumentation)
 	}()
 }
 
@@ -37,15 +39,15 @@ func ExposeWithRestful(addr string) {
 }
 
 func StopExpose() {
-	if ExposerInstance != nil {
-		ExposerInstance.Stop()
+	if DefaultExposer != nil {
+		DefaultExposer.Stop()
 	}
-	ExposerInstance = nil
+	DefaultExposer = nil
 }
 
 func SetCallback(interval time.Duration, callback Callback) {
 	CallbackTick = time.Tick(interval)
-	CallbackInstance = callback
+	DefaultCallback = callback
 	CallbackStop = make(chan int)
 
 	go loopCallback()
@@ -61,7 +63,7 @@ func UnsetCallback() {
 	}
 
 	CallbackStop = nil
-	CallbackInstance = nil
+	DefaultCallback = nil
 	CallbackTick = nil
 
 }
@@ -70,7 +72,7 @@ func loopCallback() {
 	for {
 		select {
 		case <-CallbackTick:
-			err := CallbackInstance.OnCallback(Instance)
+			err := DefaultCallback.OnCallback(DefaultInstrumentation)
 			fireError(err)
 		case <-CallbackStop:
 			return
