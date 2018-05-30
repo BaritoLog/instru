@@ -33,30 +33,38 @@ func TestCounter(t *testing.T) {
 	FatalIf(t, len(metric.Events) != 3, "wrong metric event")
 }
 
-func TestExposeWithRestful(t *testing.T) {
-	ExposeWithRestful(":65501")
-	FatalIf(t, DefaultExposer == nil, "DefaultExposer can't be nil")
-	FatalIf(t, reflect.TypeOf(DefaultExposer).String() != "*instru.restfulExposer", "wrong type DefaultExposer")
+func TestExpose(t *testing.T) {
+	exposer := &dummyExposer{}
+
+	Expose(exposer)
+	FatalIf(t, DefaultExposer != exposer, "wrong DefaultExposer")
 
 	timekit.Sleep("1ms")
+	FatalIf(t, exposer.Instr != DefaultInstrumentation, "exposer.Instr must be same with DefaultInstrumentation")
 
 	StopExpose()
 	FatalIf(t, DefaultExposer != nil, "DefaultExposer must be nil")
 }
 
-func TestExposeWithRestful_Error(t *testing.T) {
+func TestExpose_Error(t *testing.T) {
 	var err error
 	OnErrorFunc = func(err0 error) {
 		err = err0
 	}
+	exposer := &dummyExposer{Err: fmt.Errorf("some error")}
 
-	ExposeWithRestful(":65502")
-	ExposeWithRestful(":65502") // same address
+	Expose(exposer)
 	defer StopExpose()
 
 	timekit.Sleep("1ms")
+	FatalIfWrongError(t, err, "some error")
+}
 
-	FatalIfWrongError(t, err, "listen tcp :65502: bind: address already in use")
+func TestExposeWithRestful(t *testing.T) {
+	ExposeWithRestful(":66000")
+	defer StopExpose()
+
+	FatalIf(t, reflect.TypeOf(DefaultExposer).String() != "*instru.restfulExposer", "wrong DefaultExposer type")
 }
 
 func TestSetCallback(t *testing.T) {

@@ -5,11 +5,6 @@ import (
 	"net/http"
 )
 
-type Exposer interface {
-	Expose(Instrumentation) error
-	Stop()
-}
-
 type restfulExposer struct {
 	Addr   string
 	instr  Instrumentation
