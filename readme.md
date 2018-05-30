@@ -17,7 +17,7 @@ func myFunction()  {
 }
 ```
 
-Evaluation metric (in nano seconds) sample
+Sample of Evaluation metric (in nano seconds) 
 ```js
 {
   "evaluations": {
@@ -44,7 +44,7 @@ func oddOrEven()  {
 }
 ```
 
-Counter metric sample
+Sample of Counter metric 
 ```js
 {
   "counters": {
@@ -59,21 +59,23 @@ Counter metric sample
 }
 ```
 
-## Pull-based Instrumentation Metric 
+## Pull Instrumentation Metric 
 
-### Using RESTful API
+#### Using RESTful API
+
+Enable RESTful Server
 ```go
 func main()  {
   instru.ExposeWithRestful(":8998")
 }
 ```
 
-See using curl
+Now you can check the metric via curl
 ```sh
 curl http://localhost:8998
 ```
 
-Instrumentation metric sample
+Sample of Instrumentation metric
 ```js
 {
   "evaluations": {
@@ -97,7 +99,7 @@ Instrumentation metric sample
 }
 ```
 
-Make custom exposer
+#### Create Custom Exposer
 
 ```go
 type CustomExposer struct{
@@ -121,9 +123,20 @@ func main()  {
 }
 ```
 
-## Push-based Instrumentation Metric 
+## Push Instrumentation Metric 
 
-Callback Function
+#### Web Callback
+
+Set a web callback
+```go
+func main()  {
+  interval, _ := time.ParseDuration("5m")
+  SetWebCallback(interval, "http://my-server:3042")
+}
+```
+
+#### Create Custom Callback
+
 ```go
 type MyCallback struct{
 }
@@ -136,7 +149,6 @@ func (c *MyCallback) OnCallback(instr Instrumentation) (err error) {
 ```go
 func main()  {
   interval, _ := time.ParseDuration("5m")
-  callback := &MyCallback{}
-  instru.SetCallback(interval, callback)  
+  instru.SetCallback(interval, &MyCallback{})  
 }
 ```
