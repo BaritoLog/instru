@@ -32,10 +32,10 @@ func TestWebCallback(t *testing.T) {
 }
 
 func TestWebCallback_ClientError(t *testing.T) {
-	callback := NewWebCallback("http://wrong-url")
+	callback := NewWebCallback("wrong-url")
 	err := callback.OnCallback(NewInstrumentation())
 
-	FatalIfWrongError(t, err, "Post http://wrong-url: dial tcp: lookup wrong-url: no such host")
+	FatalIfWrongError(t, err, `Post wrong-url: unsupported protocol scheme ""`)
 }
 
 func TestWebCallback_StatusCodeNotOK(t *testing.T) {
