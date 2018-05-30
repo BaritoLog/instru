@@ -59,7 +59,7 @@ Sample of Counter metric
 }
 ```
 
-## Pull Instrumentation Metric 
+## Pull the Instrumentation Metric 
 
 #### Using RESTful API
 
@@ -123,7 +123,7 @@ func main()  {
 }
 ```
 
-## Push Instrumentation Metric 
+## Push the Instrumentation Metric 
 
 #### Web Callback
 
