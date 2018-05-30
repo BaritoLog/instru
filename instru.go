@@ -51,6 +51,10 @@ func SetCallback(interval time.Duration, callback Callback) {
 	go loopCallback()
 }
 
+func SetWebCallback(interval time.Duration, url string) {
+	SetCallback(interval, NewWebCallback(url))
+}
+
 func UnsetCallback() {
 	if CallbackStop != nil {
 		CallbackStop <- 1

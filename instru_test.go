@@ -74,7 +74,7 @@ func TestSetCallback(t *testing.T) {
 	FatalIf(t, CallbackTick != nil, "CallbackTick must be nil")
 }
 
-func TestCallback_Error(t *testing.T) {
+func TestSetCallback_Error(t *testing.T) {
 	var err error
 	OnErrorFunc = func(err0 error) {
 		err = err0
@@ -88,4 +88,11 @@ func TestCallback_Error(t *testing.T) {
 
 	timekit.Sleep("2ms")
 	FatalIfWrongError(t, err, "some error")
+}
+
+func TestSetWebCallback(t *testing.T) {
+	SetWebCallback(timekit.Duration("1ms"), "http://somehost")
+	defer UnsetCallback()
+
+	FatalIf(t, reflect.TypeOf(CallbackInstance).String() != "*instru.webCallback", "wrong type CallbackInstance")
 }
