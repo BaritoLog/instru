@@ -4,18 +4,16 @@ import (
 	"time"
 )
 
-var DefaultInstrumentation Instrumentation
+var DefaultInstrumentation Instrumentation = NewInstrumentation()
 var DefaultExposer Exposer
 var DefaultCallback Callback
 
 var ErrorCh = make(chan error)
 var OnErrorFunc func(error)
 
-var CallbackTick <-chan time.Time
 var CallbackStop chan int
 
 func init() {
-	DefaultInstrumentation = NewInstrumentation()
 	go loopError()
 }
 
@@ -28,10 +26,10 @@ func Count(name string) Counter {
 }
 
 func Expose(exposer Exposer) {
-	DefaultExposer = exposer
 	go func() {
-		ErrorCh <- DefaultExposer.Expose(DefaultInstrumentation)
+		ErrorCh <- exposer.Expose(DefaultInstrumentation)
 	}()
+	DefaultExposer = exposer
 }
 
 func ExposeWithRestful(addr string) {
@@ -46,11 +44,22 @@ func StopExpose() {
 }
 
 func SetCallback(interval time.Duration, callback Callback) {
-	CallbackTick = time.Tick(interval)
+	tick := time.Tick(interval)
+
 	DefaultCallback = callback
 	CallbackStop = make(chan int)
 
-	go loopCallback()
+	go func() {
+		for {
+			select {
+			case <-tick:
+				err := callback.OnCallback(DefaultInstrumentation)
+				fireError(err)
+			case <-CallbackStop:
+				return
+			}
+		}
+	}()
 }
 
 func SetWebCallback(interval time.Duration, url string) {
@@ -64,20 +73,14 @@ func UnsetCallback() {
 
 	CallbackStop = nil
 	DefaultCallback = nil
-	CallbackTick = nil
-
 }
 
-func loopCallback() {
-	for {
-		select {
-		case <-CallbackTick:
-			err := DefaultCallback.OnCallback(DefaultInstrumentation)
-			fireError(err)
-		case <-CallbackStop:
-			return
-		}
+func GetEventCount(label, event string) int64 {
+	counter := DefaultInstrumentation.GetCounterMetric(label)
+	if counter != nil {
+		return counter.TotalEvent(event)
 	}
+	return 0
 }
 
 func loopError() {

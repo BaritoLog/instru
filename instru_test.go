@@ -79,7 +79,6 @@ func TestSetCallback(t *testing.T) {
 	UnsetCallback()
 	FatalIf(t, CallbackStop != nil, "CallbackStop must be nil")
 	FatalIf(t, DefaultCallback != nil, "DefaultCallback must be nil")
-	FatalIf(t, CallbackTick != nil, "CallbackTick must be nil")
 }
 
 func TestSetCallback_Error(t *testing.T) {
