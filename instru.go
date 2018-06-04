@@ -80,6 +80,10 @@ func GetEventCount(label, event string) int64 {
 	return counter.TotalEvent(event)
 }
 
+func Flush() {
+	DefaultInstrumentation.Flush()
+}
+
 func loopError() {
 	for err := range ErrorCh {
 		fireError(err)

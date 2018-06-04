@@ -108,3 +108,14 @@ func TestSetWebCallback(t *testing.T) {
 
 	FatalIf(t, reflect.TypeOf(DefaultCallback).String() != "*instru.webCallback", "wrong type DefaultCallback")
 }
+
+func TestFlush(t *testing.T) {
+
+	Count("count01").Event("success")
+	Count("count01").Event("fail")
+
+	Flush()
+
+	metric := DefaultInstrumentation.GetCounterMetric("count01")
+	FatalIf(t, metric.Total != 0, "wrong metric total")
+}

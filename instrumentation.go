@@ -9,6 +9,7 @@ type Instrumentation interface {
 	Count(name string) Counter
 	GetEvaluationMetric(name string) *EvaluationMetric
 	GetCounterMetric(name string) *CounterMetric
+	Flush()
 }
 
 type instrumentation struct {
@@ -53,4 +54,9 @@ func (i *instrumentation) GetCounterMetric(name string) *CounterMetric {
 		i.Counters[name] = metric
 	}
 	return metric
+}
+
+func (i *instrumentation) Flush() {
+	i.Evaluations = make(map[string]*EvaluationMetric)
+	i.Counters = make(map[string]*CounterMetric)
 }
