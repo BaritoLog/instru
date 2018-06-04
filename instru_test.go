@@ -31,6 +31,10 @@ func TestCounter(t *testing.T) {
 	metric := DefaultInstrumentation.GetCounterMetric("count01")
 	FatalIf(t, metric.Total != 4, "wrong metric total")
 	FatalIf(t, len(metric.Events) != 3, "wrong metric event")
+	FatalIf(t, GetEventCount("count01", "success") != 1, "wrong count event success")
+	FatalIf(t, GetEventCount("count01", "fail") != 2, "wrong count event fail")
+	FatalIf(t, GetEventCount("count01", "error") != 1, "wrong count event error")
+
 }
 
 func TestExpose(t *testing.T) {
