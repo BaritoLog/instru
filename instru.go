@@ -77,10 +77,7 @@ func UnsetCallback() {
 
 func GetEventCount(label, event string) int64 {
 	counter := DefaultInstrumentation.GetCounterMetric(label)
-	if counter != nil {
-		return counter.TotalEvent(event)
-	}
-	return 0
+	return counter.TotalEvent(event)
 }
 
 func loopError() {
