@@ -34,6 +34,7 @@ func TestCounter(t *testing.T) {
 	FatalIf(t, GetEventCount("count01", "success") != 1, "wrong count event success")
 	FatalIf(t, GetEventCount("count01", "fail") != 2, "wrong count event fail")
 	FatalIf(t, GetEventCount("count01", "error") != 1, "wrong count event error")
+	FatalIf(t, GetEventCount("wrong-label", "some-event") != 0, "wrong counter label must return 0")
 
 }
 
