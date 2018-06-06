@@ -12,7 +12,7 @@ import (
 )
 
 func TestWebCallback(t *testing.T) {
-	expectedBody := []byte(`{"evaluations":{"barito-flow/flow/elastic.go#store":{"count":12,"avg":5000,"sum":0,"max":10000,"min":1000,"recent":1000}},"counters":{"elastic":{"Total":21,"Events":{"error":1,"success":19}}}}`)
+	expectedBody := []byte(`{"metrics":{"test01":{"_counter":{"Events":{"success":1},"Total":1},"_evaluation_time":{"avg":20042572,"count":1,"max":20042572,"min":20042572,"recent":20042572,"sum":20042572},"some-metric":"value"}}}`)
 	var gotBody []byte
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

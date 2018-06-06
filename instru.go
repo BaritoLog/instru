@@ -76,8 +76,7 @@ func UnsetCallback() {
 }
 
 func GetEventCount(label, event string) int64 {
-	counter := DefaultInstrumentation.GetCounterMetric(label)
-	return counter.TotalEvent(event)
+	return DefaultInstrumentation.Metric(label).CounterMetric().TotalEvent(event)
 }
 
 func Flush() {

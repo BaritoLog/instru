@@ -5,58 +5,46 @@ import (
 )
 
 type Instrumentation interface {
-	Evaluate(name string) Evaluation
-	Count(name string) Counter
-	GetEvaluationMetric(name string) *EvaluationMetric
-	GetCounterMetric(name string) *CounterMetric
+	Evaluate(label string) Evaluation
+	Count(label string) Counter
+	Metric(label string) InstrumentationMetric
 	Flush()
 }
 
 type instrumentation struct {
-	Evaluations map[string]*EvaluationMetric `json:"evaluations"`
-	Counters    map[string]*CounterMetric    `json:"counters"`
+	Metrics map[string]InstrumentationMetric `json:"metrics"`
 }
 
 func NewInstrumentation() Instrumentation {
 	return &instrumentation{
-		Evaluations: make(map[string]*EvaluationMetric),
-		Counters:    make(map[string]*CounterMetric),
+		Metrics: make(map[string]InstrumentationMetric),
 	}
 }
 
-func (i *instrumentation) Evaluate(name string) Evaluation {
+func (i *instrumentation) Evaluate(label string) Evaluation {
 	return NewEvaluation(
 		time.Now(),
-		i.GetEvaluationMetric(name),
+		i.Metric(label).EvaluationMetric(),
 	)
 }
 
-func (i *instrumentation) Count(name string) Counter {
+func (i *instrumentation) Count(label string) Counter {
 	return NewCounter(
-		i.GetCounterMetric(name),
+		i.Metric(label).CounterMetric(),
 	)
 }
 
-func (i *instrumentation) GetEvaluationMetric(name string) *EvaluationMetric {
-	metric, ok := i.Evaluations[name]
+// Return InstrumentationMetric. It will create empty metric if not exist
+func (i *instrumentation) Metric(label string) InstrumentationMetric {
+	instrMetric, ok := i.Metrics[label]
 	if !ok {
-		metric = NewEvaluationMetric()
-		i.Evaluations[name] = metric
+		instrMetric = NewInstrumentationMetric()
+		i.Metrics[label] = instrMetric
 	}
 
-	return metric
-}
-
-func (i *instrumentation) GetCounterMetric(name string) *CounterMetric {
-	metric, ok := i.Counters[name]
-	if !ok {
-		metric = NewCounterMetric()
-		i.Counters[name] = metric
-	}
-	return metric
+	return instrMetric
 }
 
 func (i *instrumentation) Flush() {
-	i.Evaluations = make(map[string]*EvaluationMetric)
-	i.Counters = make(map[string]*CounterMetric)
+	i.Metrics = make(map[string]InstrumentationMetric)
 }

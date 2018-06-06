@@ -18,7 +18,7 @@ func TestEvaluate(t *testing.T) {
 	timekit.Sleep("300ms")
 	eval.Done()
 
-	metric := DefaultInstrumentation.GetEvaluationMetric("eval01")
+	metric := DefaultInstrumentation.Metric("eval01").EvaluationMetric()
 	FatalIf(t, metric.Count != 2, "wrong metric count")
 }
 
@@ -28,14 +28,13 @@ func TestCounter(t *testing.T) {
 	Count("count01").Event("error")
 	Count("count01").Event("fail")
 
-	metric := DefaultInstrumentation.GetCounterMetric("count01")
+	metric := DefaultInstrumentation.Metric("count01").CounterMetric()
 	FatalIf(t, metric.Total != 4, "wrong metric total")
 	FatalIf(t, len(metric.Events) != 3, "wrong metric event")
 	FatalIf(t, GetEventCount("count01", "success") != 1, "wrong count event success")
 	FatalIf(t, GetEventCount("count01", "fail") != 2, "wrong count event fail")
 	FatalIf(t, GetEventCount("count01", "error") != 1, "wrong count event error")
 	FatalIf(t, GetEventCount("wrong-label", "some-event") != 0, "wrong counter label must return 0")
-
 }
 
 func TestExpose(t *testing.T) {
@@ -110,12 +109,11 @@ func TestSetWebCallback(t *testing.T) {
 }
 
 func TestFlush(t *testing.T) {
-
 	Count("count01").Event("success")
 	Count("count01").Event("fail")
 
 	Flush()
 
-	metric := DefaultInstrumentation.GetCounterMetric("count01")
+	metric := DefaultInstrumentation.Metric("count01").CounterMetric()
 	FatalIf(t, metric.Total != 0, "wrong metric total")
 }

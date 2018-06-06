@@ -11,7 +11,7 @@ import (
 )
 
 func TestRestfulServer_Start(t *testing.T) {
-	expectedBody := []byte(`{"evaluations":{"barito-flow/flow/elastic.go#store":{"count":12,"avg":5000,"sum":0,"max":10000,"min":1000,"recent":1000}},"counters":{"elastic":{"Total":21,"Events":{"error":1,"success":19}}}}`)
+	expectedBody := []byte(`{"metrics":{"test01":{"_counter":{"Events":{"success":1},"Total":1}}}}`)
 
 	instr := &instrumentation{}
 	err := json.Unmarshal(expectedBody, instr)
@@ -29,5 +29,4 @@ func TestRestfulServer_Start(t *testing.T) {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 	FatalIf(t, bytes.Compare(body, expectedBody) != 0, "got wrong body")
-
 }
