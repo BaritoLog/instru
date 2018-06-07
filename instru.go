@@ -8,34 +8,39 @@ var DefaultInstrumentation Instrumentation = NewInstrumentation()
 var DefaultExposer Exposer
 var DefaultCallback Callback
 
-var ErrorCh = make(chan error)
-var OnErrorFunc func(error)
+var errorCh = make(chan error)
+var callbackStop chan int
 
-var CallbackStop chan int
+var OnErrorFunc func(error)
 
 func init() {
 	go loopError()
 }
 
-func Evaluate(name string) Evaluation {
-	return DefaultInstrumentation.Evaluate(name)
+// Create new Evaluation in default instrumentation
+func Evaluate(label string) Evaluation {
+	return DefaultInstrumentation.Evaluate(label)
 }
 
-func Count(name string) Counter {
-	return DefaultInstrumentation.Count(name)
+// Create new Counter in default instrumentation
+func Count(label string) Counter {
+	return DefaultInstrumentation.Count(label)
 }
 
+// Expose default instrumentation
 func Expose(exposer Exposer) {
 	go func() {
-		ErrorCh <- exposer.Expose(DefaultInstrumentation)
+		errorCh <- exposer.Expose(DefaultInstrumentation)
 	}()
 	DefaultExposer = exposer
 }
 
+// Expose default instrumentation with restful api
 func ExposeWithRestful(addr string) {
 	Expose(NewRestfulExposer(addr))
 }
 
+// Stop expose default instrumentation
 func StopExpose() {
 	if DefaultExposer != nil {
 		DefaultExposer.Stop()
@@ -43,11 +48,12 @@ func StopExpose() {
 	DefaultExposer = nil
 }
 
+// Set callback for default instrumentation
 func SetCallback(interval time.Duration, callback Callback) {
 	tick := time.Tick(interval)
 
 	DefaultCallback = callback
-	CallbackStop = make(chan int)
+	callbackStop = make(chan int)
 
 	go func() {
 		for {
@@ -55,23 +61,24 @@ func SetCallback(interval time.Duration, callback Callback) {
 			case <-tick:
 				err := callback.OnCallback(DefaultInstrumentation)
 				fireError(err)
-			case <-CallbackStop:
+			case <-callbackStop:
 				return
 			}
 		}
 	}()
 }
 
+// Set web callback for default instrumentation
 func SetWebCallback(interval time.Duration, url string) {
 	SetCallback(interval, NewWebCallback(url))
 }
 
 func UnsetCallback() {
-	if CallbackStop != nil {
-		CallbackStop <- 1
+	if callbackStop != nil {
+		callbackStop <- 1
 	}
 
-	CallbackStop = nil
+	callbackStop = nil
 	DefaultCallback = nil
 }
 
@@ -84,7 +91,7 @@ func Flush() {
 }
 
 func loopError() {
-	for err := range ErrorCh {
+	for err := range errorCh {
 		fireError(err)
 	}
 }

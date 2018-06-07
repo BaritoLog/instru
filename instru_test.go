@@ -81,7 +81,7 @@ func TestSetCallback(t *testing.T) {
 	FatalIf(t, callback.Instr != DefaultInstrumentation, "callback.instrument is wrong")
 
 	UnsetCallback()
-	FatalIf(t, CallbackStop != nil, "CallbackStop must be nil")
+	FatalIf(t, callbackStop != nil, "CallbackStop must be nil")
 	FatalIf(t, DefaultCallback != nil, "DefaultCallback must be nil")
 }
 
