@@ -1,6 +1,6 @@
 package instru
 
-const (
+var (
 	KeyEvaluationTime = "_evaluation_time"
 	KeyCounter        = "_counter"
 )
