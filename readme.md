@@ -1,27 +1,27 @@
 # Instru
 
-Simple go instrumentation library for flexible push/pull based data strategy
+Simple go [instrumentation](https://en.wikipedia.org/wiki/Instrumentation_%28computer_programming%29) library for flexible [push-pull strategy](https://en.wikipedia.org/wiki/Push%E2%80%93pull_strategy).
 
-## Instrumenting your code
+Find us at [godoc](https://godoc.org/github.com/BaritoLog/instru)
 
-#### Evaluation time
+## 1. Instrumenting your code
+
+#### 1.1 Evaluation time
 
 ```go
 func myFunction()  {
   eval := instru.Evaluate("myFunction")
   defer eval.Done()
   
-  
-  d, _ := time.Duration("2s")
-  time.Sleep(d)
+  // some process
 }
 ```
 
-Sample of Evaluation metric (in nano seconds) 
+Sample of Evaluation Time Metric (in nano seconds)
 ```js
 {
-  "evaluations": {
-    "myFunction": {
+  "myFunction": {
+    "_evaluation_time": {
       "count": 12,
       "avg": 5000,
       "max": 10000,
@@ -32,14 +32,14 @@ Sample of Evaluation metric (in nano seconds)
 }
 ```
 
-#### Counter
+#### 1.2 Counter
 
 ```go
-func oddOrEven()  {
+func myFunction()  {
 	if rand.Int31()%2 == 0 {
-		instru.Counter("odd_or_even").Event("odd")
+		instru.Counter("myFunction").Event("odd")
 	} else {
-		instru.Counter("odd_or_even").Event("even")
+		instru.Counter("myFunction").Event("even")
 	}
 }
 ```
@@ -47,8 +47,8 @@ func oddOrEven()  {
 Sample of Counter metric 
 ```js
 {
-  "counters": {
-    "odd_or_even": {
+  "myFunction": {
+    "_counter": {
       "total": 21,
       "events": {
         "odd": 9,
@@ -59,18 +59,40 @@ Sample of Counter metric
 }
 ```
 
-## Pull the Instrumentation Metric 
+### 1.3 Custom Instrumenting
 
-#### Using RESTful API
+```go
+func myFunction()  {
+  // get fileinfo of my.conf
+  _, err := os.Stat("my.conf")
+  
+  instru.Metric("myFunc").Put("is_config_exist", os.IsNotExist(err))
+}
+```
 
-Enable RESTful Server
+Some of metric
+```js
+{
+  "myFunction": {
+    "is_config_exist": true
+  }
+}
+```
+
+
+
+## 2. Pull the Instrumentation Metric 
+
+#### 2.1 With RESTful API
+
+Expose with RESTful API
 ```go
 func main()  {
   instru.ExposeWithRestful(":8998")
 }
 ```
 
-Now you can check the metric via curl
+Retrieve the instrumentation metric
 ```sh
 curl http://localhost:8998
 ```
@@ -78,28 +100,27 @@ curl http://localhost:8998
 Sample of Instrumentation metric
 ```js
 {
-  "evaluations": {
-    "myFunc": {
+  "myFunc": {
+    "_evaluation_time": {
       "count": 12,
       "avg": 5000,
       "max": 10000,
       "min": 1000,
       "recent": 1000
-    }
-  },
-  "counters": {
-    "oddOrEvn": {
+    },
+    "_counter": {
       "total": 21,
       "events": {
         "odd": 9,
         "even": 12
       }
-    }
+    },
+    "is_config_exist": true
   }
 }
 ```
 
-#### Create Custom Exposer
+#### 2.2 With Custom Exposer
 
 ```go
 type CustomExposer struct{
@@ -123,11 +144,9 @@ func main()  {
 }
 ```
 
-## Push the Instrumentation Metric 
+## 3. Push the Instrumentation Metric 
 
-#### Web Callback
-
-Set a web callback
+#### 3.1 Web Callback
 ```go
 func main()  {
   interval, _ := time.ParseDuration("5m")
@@ -135,7 +154,7 @@ func main()  {
 }
 ```
 
-#### Create Custom Callback
+#### 3.2 Custom Callback
 
 ```go
 type MyCallback struct{
