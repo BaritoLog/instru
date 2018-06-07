@@ -27,6 +27,11 @@ func Count(label string) Counter {
 	return DefaultInstrumentation.Count(label)
 }
 
+// Return metric of default instrumentation
+func Metric(label string) InstrumentationMetric {
+	return DefaultInstrumentation.Metric(label)
+}
+
 // Expose default instrumentation
 func Expose(exposer Exposer) {
 	go func() {

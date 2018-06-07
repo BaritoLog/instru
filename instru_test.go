@@ -117,3 +117,9 @@ func TestFlush(t *testing.T) {
 	metric := DefaultInstrumentation.Metric("count01").CounterMetric()
 	FatalIf(t, metric.Total != 0, "wrong metric total")
 }
+
+func TestMetric(t *testing.T) {
+	Metric("metric01").Put("some-key", "some-value")
+
+	FatalIf(t, DefaultInstrumentation.Metric("metric01").Get("some-key") != "some-value", "wrong value")
+}
