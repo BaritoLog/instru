@@ -1,8 +1,8 @@
 package instru
 
-var (
-	KeyEvaluationTime = "_evaluation_time"
-	KeyCounter        = "_counter"
+const (
+	keyEvaluationTime = "_evaluation_time"
+	keyCounter        = "_counter"
 )
 
 type InstrumentationMetric map[string]interface{}
@@ -14,10 +14,10 @@ func NewInstrumentationMetric() InstrumentationMetric {
 
 // Return EvaluationMetric. It will create empty metric if not available.
 func (m InstrumentationMetric) EvaluationMetric() *EvaluationMetric {
-	metric, ok := m[KeyEvaluationTime]
+	metric, ok := m[keyEvaluationTime]
 	if !ok {
 		metric = NewEvaluationMetric()
-		m[KeyEvaluationTime] = metric
+		m[keyEvaluationTime] = metric
 	}
 
 	return metric.(*EvaluationMetric)
@@ -25,10 +25,10 @@ func (m InstrumentationMetric) EvaluationMetric() *EvaluationMetric {
 
 // Return CounterMetric. It will create empty metric if not available.
 func (m InstrumentationMetric) CounterMetric() *CounterMetric {
-	metric, ok := m[KeyCounter]
+	metric, ok := m[keyCounter]
 	if !ok {
 		metric = NewCounterMetric()
-		m[KeyCounter] = metric
+		m[keyCounter] = metric
 	}
 	return metric.(*CounterMetric)
 }
