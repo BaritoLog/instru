@@ -2,7 +2,6 @@ package instru
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -16,7 +15,7 @@ func NewWebCallback(url string) Callback {
 }
 
 func (c *webCallback) OnCallback(instr Instrumentation) (err error) {
-	b, _ := json.Marshal(instr)
+	b, _ := instr.ToJson()
 
 	resp, err := http.Post(c.url, "application/json", bytes.NewReader(b))
 	if err != nil {

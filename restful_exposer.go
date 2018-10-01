@@ -1,7 +1,6 @@
 package instru
 
 import (
-	"encoding/json"
 	"net/http"
 )
 
@@ -35,6 +34,6 @@ func (e *restfulExposer) Stop() {
 }
 
 func (e *restfulExposer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	data, _ := json.Marshal(e.instr)
+	data, _ := e.instr.ToJson()
 	rw.Write(data)
 }

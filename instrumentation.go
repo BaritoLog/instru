@@ -1,23 +1,26 @@
 package instru
 
 import (
+	"encoding/json"
 	"time"
 )
 
 type Instrumentation interface {
 	Evaluate(label string) Evaluation
 	Count(label string) Counter
-	Metric(label string) InstrumentationMetric
+	Metric(label string) *InstrumentationMetric
+	Metrics() map[string]*InstrumentationMetric
+	ToJson() ([]byte, error)
 	Flush()
 }
 
 type instrumentation struct {
-	Metrics map[string]InstrumentationMetric `json:"metrics"`
+	metrics map[string]*InstrumentationMetric
 }
 
 func NewInstrumentation() Instrumentation {
 	return &instrumentation{
-		Metrics: make(map[string]InstrumentationMetric),
+		metrics: make(map[string]*InstrumentationMetric),
 	}
 }
 
@@ -35,16 +38,41 @@ func (i *instrumentation) Count(label string) Counter {
 }
 
 // Return InstrumentationMetric. It will create empty metric if not exist
-func (i *instrumentation) Metric(label string) InstrumentationMetric {
-	instrMetric, ok := i.Metrics[label]
+func (i *instrumentation) Metric(label string) *InstrumentationMetric {
+	instrMetric, ok := i.metrics[label]
 	if !ok {
 		instrMetric = NewInstrumentationMetric()
-		i.Metrics[label] = instrMetric
+		i.metrics[label] = instrMetric
 	}
 
 	return instrMetric
 }
 
+func (i *instrumentation) Metrics() map[string]*InstrumentationMetric {
+	return i.metrics
+}
+
+func (i *instrumentation) ToJson() (data []byte, err error) {
+
+	metrics := make(map[string]interface{})
+	for key, value := range i.Metrics() {
+		metricResult := make(map[string]interface{})
+		value.Data.Range(func(key interface{}, value interface{}) bool {
+			metricResult[key.(string)] = value
+			return true
+		})
+
+		metrics[key] = metricResult
+	}
+
+	result := make(map[string]interface{})
+	result["metrics"] = metrics
+
+	data, err = json.Marshal(result)
+	return
+
+}
+
 func (i *instrumentation) Flush() {
-	i.Metrics = make(map[string]InstrumentationMetric)
+	i.metrics = make(map[string]*InstrumentationMetric)
 }

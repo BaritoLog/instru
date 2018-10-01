@@ -2,7 +2,6 @@ package instru
 
 import (
 	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -11,11 +10,10 @@ import (
 )
 
 func TestRestfulServer_Start(t *testing.T) {
-	expectedBody := []byte(`{"metrics":{"test01":{"_counter":{"Events":{"success":1},"Total":1}}}}`)
+	expectedBody := []byte(`{"metrics":{"test01":{"_counter":{"total":1,"events":{"success":1}}}}}`)
 
-	instr := &instrumentation{}
-	err := json.Unmarshal(expectedBody, instr)
-	FatalIfError(t, err)
+	instr := NewInstrumentation()
+	instr.Count("test01").Event("success")
 
 	exposer := NewRestfulExposer(":65500")
 

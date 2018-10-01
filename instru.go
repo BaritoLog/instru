@@ -28,7 +28,7 @@ func Count(label string) Counter {
 }
 
 // Return metric of default instrumentation
-func Metric(label string) InstrumentationMetric {
+func Metric(label string) *InstrumentationMetric {
 	return DefaultInstrumentation.Metric(label)
 }
 
