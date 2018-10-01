@@ -1,8 +1,8 @@
 package instru
 
 type CounterMetric struct {
-	Total  int64
-	Events map[string]int64
+	Total  int64            `json:"total"`
+	Events map[string]int64 `json:"events"`
 }
 
 func NewCounterMetric() *CounterMetric {
