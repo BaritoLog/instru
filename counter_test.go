@@ -18,7 +18,9 @@ func TestCounter_Event(t *testing.T) {
 	counter.Event("error")
 
 	FatalIf(t, metric.Total != 5, "wrong metrix.total")
-	FatalIf(t, metric.Events["success"] != 3, "wrong metrix.events.success")
-	FatalIf(t, metric.Events["error"] != 2, "wrong metrix.events.success")
+	ec, _ := metric.Load("success")
+	FatalIf(t, ec != 3, "wrong metrix.events.success")
+	ec, _ = metric.Load("error")
+	FatalIf(t, ec != 2, "wrong metrix.events.success")
 
 }

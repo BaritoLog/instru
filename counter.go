@@ -16,5 +16,9 @@ func NewCounter(metric *CounterMetric) Counter {
 
 func (s *counter) Event(name string) {
 	s.metric.Total++
-	s.metric.Events[name]++
+	ec, ok := s.metric.Load(name)
+	if !ok {
+		ec = 0
+	}
+	s.metric.Store(name, ec+1)
 }
