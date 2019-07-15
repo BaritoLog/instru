@@ -3,6 +3,7 @@ package instru
 import (
 	"encoding/json"
 	"time"
+	"sync"
 )
 
 type Instrumentation interface {
@@ -15,6 +16,7 @@ type Instrumentation interface {
 }
 
 type instrumentation struct {
+	sync.RWMutex
 	metrics map[string]*InstrumentationMetric
 }
 
@@ -39,10 +41,14 @@ func (i *instrumentation) Count(label string) Counter {
 
 // Return InstrumentationMetric. It will create empty metric if not exist
 func (i *instrumentation) Metric(label string) *InstrumentationMetric {
+	i.RLock()
 	instrMetric, ok := i.metrics[label]
+	i.RUnlock()
 	if !ok {
 		instrMetric = NewInstrumentationMetric()
+		i.Lock()
 		i.metrics[label] = instrMetric
+		i.Unlock()
 	}
 
 	return instrMetric
